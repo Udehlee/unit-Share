@@ -5,7 +5,7 @@ import { pool } from "./db.conn.js";
 const client = await pool.connect();
 
 //saveUser Saves a new user 
-const saveUser = async (data) => {
+export const saveUser = async (data) => {
   const { fullname, email, password, meterNumber, meterType, unitBalance } = data;
   const createdAt = new Date();
   const query = ` 
@@ -19,7 +19,7 @@ const saveUser = async (data) => {
 };
 
 //checkEmail Checks if a user with the given email exists in the database
-const checkEmail = async (email) => {
+export const checkEmail = async (email) => {
   try {
     const query = `SELECT * FROM users WHERE email = $1`;
     const result = await  client.query(query, [email]);
@@ -37,7 +37,7 @@ const checkEmail = async (email) => {
 };
 
 //saveTransaction Saves the transaction after transferring units between users
-const saveTransaction = async (data) => {
+export const saveTransaction = async (data) => {
   const { senderId, recipientId, unitsTransferred } = data;
   const createdAt = new Date();
 
@@ -85,4 +85,4 @@ const saveTransaction = async (data) => {
   }
 };
 
-export default { saveUser, checkEmail, saveTransaction };
+
