@@ -2,10 +2,11 @@
   "name": "node",
   "version": "1.0.0",
   "type": "module",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-     "migrate": "node-pg-migrate"
+   "migrate:up": "node-pg-migrate up",
+   "migrate:down": "node-pg-migrate down"
   },
   "keywords": [],
   "author": "",
@@ -21,8 +22,7 @@
   },
   "devDependencies": {
     "node-pg-migrate": "^8.0.3",
+    "pino-pretty": "^13.0.0",
     "prettier": "^3.6.2"
   }
 }
-
-
