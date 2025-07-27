@@ -11,4 +11,4 @@ function user( {id, fullname, email, pass_word, meter_number, meter_type, unit_b
   };
 }
 
-export default { user };
+export default user;

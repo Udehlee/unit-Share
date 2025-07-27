@@ -1,12 +1,12 @@
-function transaction({id,sender_id,recipient_id,units_Transferred,_status}){
-    return {
-        id,
-        senderId: sender_id,
-        recipientId: recipient_id,
-        unitsTransferred: units_Transferred,
-        status: _status,
-        createdAt: new Date(),
-    }
+function transaction({ id, sender_id, recipient_id, units_transferred, _status, created_at }) {
+  return {
+    id,
+    senderId: sender_id,
+    recipientId: recipient_id,
+    unitsTransferred: units_transferred,
+    status: _status,
+    createdAt: created_at, 
+  };
 }
 
-export default { transaction }
+export default transaction;
