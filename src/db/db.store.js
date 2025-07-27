@@ -1,5 +1,6 @@
-import { user } from "../models/userModel.js";
-import { logger } from "../utils/logger.js";
+import  user  from "../models/userModel.js";
+import transaction from "../models/transactionModel.js";
+import  logger  from "../utils/logger.js";
 import { pool } from "./db.conn.js";
 
 const client = await pool.connect();
@@ -9,8 +10,8 @@ export const saveUser = async (data) => {
   const { fullname, email, password, meterNumber, meterType, unitBalance } = data;
   const createdAt = new Date();
   const query = ` 
-    INSERT INTO users (fullname, email, pass_word, meter_number, meter_type, unit_balance, created_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7)
+    INSERT INTO users (fullname, email, pass_word, meter_number, meter_type, unit_balance)
+    VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING id, fullname, email, meter_number, meter_type, unit_balance, created_at;
   `;
 
@@ -39,7 +40,6 @@ export const checkEmail = async (email) => {
 //saveTransaction Saves the transaction after transferring units between users
 export const saveTransaction = async (data) => {
   const { senderId, recipientId, unitsTransferred } = data;
-  const createdAt = new Date();
 
   const senderquery ="SELECT units_balance FROM users WHERE id = $1 FOR UPDATE";
   const sender = await client.query(senderquery, [senderId]);
@@ -67,15 +67,17 @@ export const saveTransaction = async (data) => {
     await client.query("UPDATE users SET units_balance = units_balance - $1 WHERE id = $2",[unitsTransferred, senderId]);
     await client.query("UPDATE users SET units_balance = units_balance + $1 WHERE id = $2",[unitsTransferred, recipientId]);
 
+    const _status = 'success'
     const result = await client.query(
-      `INSERT INTO transactions (sender_id, recipient_id, units_transferred)
-       VALUES($1,$2,$3)
-       RETURNING id, sender_id, recipient_id, units_transferred, status, created_at`,
-      [senderId, recipientId, unitsTransferred, "success", createdAt]
+      `INSERT INTO transactions (sender_id, recipient_id, units_transferred, _status)
+       VALUES($1,$2,$3,$4)
+       RETURNING id, sender_id, recipient_id, units_transferred, _status, created_at`,
+      [senderId, recipientId, unitsTransferred, _status]
     );
 
     await client.query("COMMIT");
-    return result.rows[0];
+    return transaction(result.rows[0]);
+
   } catch (err) {
     await client.query("ROLLBACK");
     logger.error("Rollback Transaction:", err);
