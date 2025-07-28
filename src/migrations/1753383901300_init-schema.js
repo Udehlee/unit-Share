@@ -54,7 +54,7 @@ export const up = (pgm) => {
       },
     _status: { 
       type: 'varchar(50)', 
-      notNull: true 
+      notNull: true
     },
     created_at: {
       type: 'timestamp',
