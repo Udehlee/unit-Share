@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "type": "module",
   "main": "server.js",
-  "scripts": {
+   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-   "migrate:up": "node-pg-migrate up",
-   "migrate:down": "node-pg-migrate down"
+    "start": "node src/server.js", 
+    "migrate:up": "node-pg-migrate up -m src/migrations",
+    "migrate:down": "node-pg-migrate down -m src/migrations"
   },
+
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -16,6 +18,7 @@
     "argon2": "^0.43.1",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
+    "nanoid": "^5.1.5",
     "pg": "^8.16.3",
     "pg-hstore": "^2.3.4",
     "pino": "^9.7.0"
