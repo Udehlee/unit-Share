@@ -8,14 +8,13 @@ const client = await pool.connect();
 //saveUser Saves a new user 
 export const saveUser = async (data) => {
   const { fullname, email, password, meterNumber, meterType, unitBalance } = data;
-  const createdAt = new Date();
   const query = ` 
     INSERT INTO users (fullname, email, pass_word, meter_number, meter_type, unit_balance)
     VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING id, fullname, email, meter_number, meter_type, unit_balance, created_at;
   `;
 
-  const result = await client.query(query, [fullname, email, password, meterNumber, meterType, unitBalance,createdAt]);
+  const result = await client.query(query, [fullname,email,password,meterNumber,meterType,unitBalance]);
   return user(result.rows[0]);
 };
 
@@ -37,18 +36,35 @@ export const checkEmail = async (email) => {
   }
 };
 
+//checkMeterNumber checks if meter number already exists in the database
+export const checkMeterNumber = async (meterNumber) => {
+  try {
+    const query = `SELECT * FROM users WHERE meter_number = $1`;
+    const result = await client.query(query, [meterNumber]);
+
+    if (result.rows.length === 0) {
+        logger.info("No user found with meterNumber: " + meterNumber);
+      return null;
+    }
+    return result.rows[0];
+  } catch (err) {
+    logger.error("Error checking meter number", err);
+    throw err;
+  }
+};
+
 //saveTransaction Saves the transaction after transferring units between users
 export const saveTransaction = async (data) => {
   const { senderId, recipientId, unitsTransferred } = data;
 
-  const senderquery ="SELECT units_balance FROM users WHERE id = $1 FOR UPDATE";
+  const senderquery ="SELECT unit_balance FROM users WHERE id = $1 FOR UPDATE";
   const sender = await client.query(senderquery, [senderId]);
   if (sender.rows.length == 0) {
     logger.error("Sender not found, stopping the transaction");
     throw new Error("Sender not found");
   }
 
-  const recipientquery ="SELECT units_balance FROM users WHERE id = $1 FOR UPDATE";
+  const recipientquery ="SELECT unit_balance FROM users WHERE id = $1 FOR UPDATE";
   const recipient = await client.query(recipientquery, [recipientId]);
   if (recipient.rows.length == 0) {
     logger.error("Recipient not found, stopping the transaction");
@@ -64,8 +80,8 @@ export const saveTransaction = async (data) => {
   try {
     await client.query("BEGIN");
 
-    await client.query("UPDATE users SET units_balance = units_balance - $1 WHERE id = $2",[unitsTransferred, senderId]);
-    await client.query("UPDATE users SET units_balance = units_balance + $1 WHERE id = $2",[unitsTransferred, recipientId]);
+    await client.query("UPDATE users SET unit_balance = unit_balance - $1 WHERE id = $2",[unitsTransferred, senderId]);
+    await client.query("UPDATE users SET unit_balance = unit_balance + $1 WHERE id = $2",[unitsTransferred, recipientId]);
 
     const _status = 'success'
     const result = await client.query(
