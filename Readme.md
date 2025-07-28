@@ -1,5 +1,5 @@
 ## unit-Share
-An API service that simulates the transfer of prepaid electricity units between users
+An unit sharing system that simulates the transfer of prepaid electricity units between users
 
 ### How it works
 - After registration, The system assign a unique meter number along with an initial unit balance to the user. 
