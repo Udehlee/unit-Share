@@ -1,12 +1,13 @@
 import logger from "../utils/logger.js";
+import { generateMeterNumber } from '../utils/generateMeterNo.js';
 import { saveUser, checkEmail, saveTransaction  } from "../db/db.store.js";
 import argon2 from 'argon2'
 
 //signup creates new user account
 const signup = async (req, res) => {
-  const { fullname, email, password, meterNumber, meterType, unitBalance } = req.body;
+  const { fullname, email, password, meterType, unitBalance } = req.body;
 
-  if (!fullname || !email || !password || !meterNumber|| !meterType || unitBalance === undefined) {
+  if (!fullname || !email || !password || !meterType || unitBalance === undefined) {
     logger.error("Missing user fields");
     return res.status(422).json({ success: false, message: "All fields are required" });
   }
@@ -19,19 +20,26 @@ const signup = async (req, res) => {
     }
 
     const hashedPasswd = await argon2.hash(password);
+    const meterNumber = await generateMeterNumber();
+
     const newUser = await saveUser({
       fullname,
       email,
-      password: hashedPasswd, 
+      password: hashedPasswd,
       meterNumber,
+      meterType,
       unitBalance,
     });
 
     logger.info("User created successfully: " + email);
-    return res.status(201).json({ success: true, message: "User created successfully", data: newUser });
+    return res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      data: newUser,
+    });
   } catch (err) {
-    logger.error("failed to signin user" + err);
-    return res.status(500).json({ success: false, message: "Internal server error" });
+    logger.error("Failed to sign up user: " + err);
+    return res.status(500).json({success: false, message: "Internal server error"});
   }
 };
 
